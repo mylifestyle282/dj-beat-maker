@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DJ Beat Maker</title>
+<style>
+:root{--bg:#f4f1fb;--card:#fff;--tx:#1d1630;--mu:#6b6384;--ac:#7c3aed;--ac2:#ec4899;--bd:#e3dcf3;--dot:#d9d0ee;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0b1a;--card:#1a1430;--tx:#f1ecff;--mu:#a399c4;--bd:#2d2450;--dot:#2d2450}}
+:root[data-theme="dark"]{--bg:#0f0b1a;--card:#1a1430;--tx:#f1ecff;--mu:#a399c4;--bd:#2d2450;--dot:#2d2450}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif}
+main{max-width:520px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:26px;margin:8px 0 2px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:15px;margin:0 0 10px}
+p.s{margin:0 0 18px;color:var(--mu);font-size:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:16px;margin-bottom:14px}
+.big{width:100%;border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:700;color:#fff;background:linear-gradient(90deg,var(--ac),var(--ac2));cursor:pointer}
+.big:active{transform:scale(.98)}
+.big:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.b{flex:1;min-width:120px;text-align:center;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:12px;padding:12px 8px;font-size:14px;cursor:pointer}
+.dots{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;margin-top:14px}
+.dot{height:14px;border-radius:4px;background:var(--dot)}
+.dot.on{background:var(--ac2)}
+.dot.q{background:color-mix(in srgb,var(--ac) 45%,var(--dot))}
+label.r{display:flex;justify-content:space-between;font-size:14px;margin:12px 0 6px}
+label.r b{color:var(--ac)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.tg{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:15px;border-top:1px solid var(--bd)}
+.tg:first-of-type{border-top:0}
+.tg small{display:block;color:var(--mu);font-size:12px}
+.sw{width:50px;height:28px;border-radius:14px;background:var(--dot);border:0;position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s}
+.sw[aria-pressed="true"]{background:var(--ac)}
+.sw[aria-pressed="true"]::after{left:25px}
+.note{color:var(--mu);font-size:12px;margin:8px 0 0}
+#st{text-align:center;font-size:13px;color:var(--ac);min-height:18px}
+</style>
+</head>
+<body>
+<main>
+<h1>🎧 DJ Beat Maker</h1>
+<p class="s">নিজের অরিজিনাল DJ বিট বানাও, নিজের গলা মেশাও, আর WAV ডাউনলোড করো।</p>
+
+<div class="card">
+<button class="big" id="play">▶ Play</button>
+<div class="dots" id="dots"></div>
+</div>
+
+<div class="card">
+<label class="r">Tempo <b id="bpmV">128 BPM</b></label>
+<input type="range" id="bpm" min="90" max="150" value="128">
+<label class="r">Bass Boost <b id="bassV">8 dB</b></label>
+<input type="range" id="bass" min="0" max="18" value="8">
+<label class="r">Echo <b id="echoV">30%</b></label>
+<input type="range" id="echo" min="0" max="80" value="30">
+</div>
+
+<div class="card">
+<div class="tg"><div>Riser / Siren<small>প্রতি ৮ বারে drop-এর আগে</small></div><button class="sw" id="riserSw" aria-pressed="true" aria-label="Riser"></button></div>
+<div class="tg"><div>8D Effect<small>হেডফোনে সাউন্ড ঘোরে</small></div><button class="sw" id="d8Sw" aria-pressed="false" aria-label="8D"></button></div>
+</div>
+
+<div class="card">
+<h2>🎤 তোমার গলা (Vocal)</h2>
+<div class="row">
+<button class="b" id="rec">🎙 Record</button>
+<label class="b" for="file">📁 Upload<input type="file" id="file" accept="audio/*" hidden></label>
+<button class="b" id="clr" hidden>✖ Remove</button>
+</div>
+<div id="vst" class="note">এখনো কোনো গলা যোগ করা হয়নি। গলা ২ বার (bar) ইন্ট্রোর পর শুরু হয়।</div>
+<label class="r">Vocal Volume <b id="volV">90%</b></label>
+<input type="range" id="vol" min="0" max="150" value="90">
+</div>
+
+<div class="card">
+<button class="big" id="dl">⬇ Download WAV</button>
+<div id="st"></div>
+<p class="note" style="text-align:center">বিট, ইফেক্ট ও তোমার গলা মিলিয়ে একটি WAV ফাইল তৈরি হবে। হেডফোন ব্যবহার করলে সবচেয়ে ভালো শোনাবে।</p>
+</div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const ROOTS=[45,41,36,43],SC=[69,72,74,76,79,81];
+let ctx,bus,bassF,echoIn,panner,lfoG,noiseBuf,timer,step=0,next=0;
+let playing=false,riserOn=true,rendering=false,vocalBuf=null,vocSrc=null,rec=null;
+const dots=$('dots');
+for(let i=0;i<16;i++){const d=document.createElement('span');d.className='dot'+(i%4==0?' q':'');dots.appendChild(d)}
+const mf=m=>440*Math.pow(2,(m-69)/12);
+
+function setup(c){
+  ctx=c;
+  bus=ctx.createGain();
+  bassF=ctx.createBiquadFilter();bassF.type='lowshelf';bassF.frequency.value=150;
+  const comp=ctx.createDynamicsCompressor();
+  panner=ctx.createStereoPanner();
+  echoIn=ctx.createGain();
+  const dly=ctx.createDelay(1),fb=ctx.createGain();
+  dly.delayTime.value=.375;fb.gain.value=.4;
+  bus.connect(bassF);
+  bus.connect(echoIn);echoIn.connect(dly);dly.connect(fb);fb.connect(dly);dly.connect(bassF);
+  bassF.connect(comp);comp.connect(panner);panner.connect(ctx.destination);
+  const lfo=ctx.createOscillator();lfo.frequency.value=.125;
+  lfoG=ctx.createGain();lfo.connect(lfoG);lfoG.connect(panner.pan);lfo.start();
+  noiseBuf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);
+  const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  applyCtl();
+}
+function init(){setup(new (window.AudioContext||window.webkitAudioContext)())}
+function applyCtl(){
+  if(!ctx)return;
+  bassF.gain.value=+$('bass').value;
+  echoIn.gain.value=+$('echo').value/100*.8;
+  lfoG.gain.value=$('d8Sw').getAttribute('aria-pressed')==='true'?.9:0;
+}
+
+function kick(t){const o=ctx.createOscillator(),g=ctx.createGain();
+  o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);
+  g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);
+  o.connect(g);g.connect(bus);o.start(t);o.stop(t+.45)}
+function noise(t,type,f,vol,dur){const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
+  s.buffer=noiseBuf;fl.type=type;fl.frequency.value=f;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  s.connect(fl);fl.connect(g);g.connect(bus);s.start(t,Math.random());s.stop(t+dur)}
+function tone(t,m,type,dur,vol,lp){const o=ctx.createOscillator(),g=ctx.createGain(),fl=ctx.createBiquadFilter();
+  o.type=type;o.frequency.value=mf(m);fl.type='lowpass';fl.frequency.value=lp;
+  g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(fl);fl.connect(g);g.connect(bus);o.start(t);o.stop(t+dur+.02)}
+function riser(t,dur){const o=ctx.createOscillator(),g=ctx.createGain();
+  o.type='sawtooth';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(3500,t+dur);
+  g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(.16,t+dur);g.gain.linearRampToValueAtTime(0,t+dur+.05);
+  o.connect(g);g.connect(bus);o.start(t);o.stop(t+dur+.1)}
+function startVocal(t){
+  if(!vocalBuf)return;
+  const s=ctx.createBufferSource(),hp=ctx.createBiquadFilter(),g=ctx.createGain();
+  s.buffer=vocalBuf;hp.type='highpass';hp.frequency.value=120;g.gain.value=+$('vol').value/100;
+  s.connect(hp);hp.connect(g);g.connect(bus);s.start(t);
+  if(!rendering)vocSrc=s;
+}
+
+function play(s,t,spb){
+  const bar=Math.floor(s/16),st=s%16,root=ROOTS[bar%4];
+  if(st%4==0)kick(t);
+  if(st%4==2)noise(t,'highpass',7000,.35,.06);
+  if(st==4||st==12)noise(t,'bandpass',1500,.7,.18);
+  if(bar>=2&&st%4==2)tone(t,root,'sawtooth',.2,.4,500);
+  if(bar>=4&&st%2==0&&Math.random()<.75)tone(t,SC[Math.random()*SC.length|0],'square',.22,.07,2500);
+  if(riserOn&&bar%8==6&&st==0)riser(t,32*spb);
+  if(bar>0&&bar%8==0&&st==0)noise(t,'highpass',5000,.5,1.2);
+  if(s==32)startVocal(t);
+  if(!rendering)setTimeout(()=>{[...dots.children].forEach((d,i)=>d.classList.toggle('on',i==st))},Math.max(0,(t-ctx.currentTime)*1000));
+}
+function sched(){
+  const spb=60/(+$('bpm').value)/4;
+  while(next<ctx.currentTime+.15){play(step,next,spb);next+=spb;step++}
+}
+function stopPlay(){
+  clearInterval(timer);playing=false;$('play').textContent='▶ Play';
+  [...dots.children].forEach(d=>d.classList.remove('on'));
+  if(vocSrc){try{vocSrc.stop()}catch(e){}vocSrc=null}
+}
+$('play').onclick=()=>{
+  if(!ctx)init();
+  ctx.resume();
+  if(playing){stopPlay();return}
+  step=0;next=ctx.currentTime+.1;timer=setInterval(sched,25);playing=true;$('play').textContent='⏹ Stop';
+};
+
+/* ---- Vocal: record / upload ---- */
+async function setVocal(ab,name){
+  if(!ctx)init();
+  try{
+    vocalBuf=await ctx.decodeAudioData(ab);
+    $('vst').textContent='✅ '+name+' ('+vocalBuf.duration.toFixed(1)+' সেকেন্ড)';
+    $('clr').hidden=false;
+  }catch(e){$('vst').textContent='এই ফাইলটি পড়া যায়নি। অন্য ফাইল চেষ্টা করো।'}
+}
+$('file').onchange=async e=>{const f=e.target.files[0];if(f)await setVocal(await f.arrayBuffer(),f.name);e.target.value=''};
+$('clr').onclick=()=>{vocalBuf=null;$('clr').hidden=true;$('vst').textContent='গলা সরানো হয়েছে।'};
+$('rec').onclick=async()=>{
+  if(rec){rec.stop();return}
+  try{
+    const st=await navigator.mediaDevices.getUserMedia({audio:true}),ch=[];
+    rec=new MediaRecorder(st);
+    rec.ondataavailable=e=>ch.push(e.data);
+    rec.onstop=async()=>{
+      st.getTracks().forEach(t=>t.stop());rec=null;$('rec').textContent='🎙 Record';
+      await setVocal(await new Blob(ch).arrayBuffer(),'রেকর্ড করা গলা');
+    };
+    rec.start();$('rec').textContent='⏹ Stop recording';
+  }catch(e){$('vst').textContent='মাইক চালু করা যায়নি। এর বদলে Upload ব্যবহার করো।'}
+};
+
+/* ---- Download WAV (offline render) ---- */
+function toWav(buf){
+  const n=buf.length,d=[buf.getChannelData(0),buf.getChannelData(1)];
+  let mx=0;for(const c of d)for(let i=0;i<n;i++){const a=Math.abs(c[i]);if(a>mx)mx=a}
+  const k=mx?.95/mx:1,ab=new ArrayBuffer(44+n*4),v=new DataView(ab);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*4,true);w(8,'WAVE');w(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,2,true);
+  v.setUint32(24,buf.sampleRate,true);v.setUint32(28,buf.sampleRate*4,true);
+  v.setUint16(32,4,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*4,true);
+  let o=44;
+  for(let i=0;i<n;i++)for(let c=0;c<2;c++){v.setInt16(o,Math.max(-1,Math.min(1,d[c][i]*k))*32767,true);o+=2}
+  return new Blob([ab],{type:'audio/wav'});
+}
+$('dl').onclick=async()=>{
+  if(rendering)return;
+  if(playing)stopPlay();
+  rendering=true;$('dl').disabled=true;$('play').disabled=true;
+  $('st').textContent='গান বানানো হচ্ছে… একটু অপেক্ষা করো';
+  const live={ctx,bus,bassF,echoIn,panner,lfoG,noiseBuf};
+  try{
+    const spb=60/(+$('bpm').value)/4,barS=16*spb,SR=44100;
+    const need=32*spb+(vocalBuf?vocalBuf.duration:0)+barS;
+    const bars=Math.min(Math.max(32,Math.ceil(need/barS)),Math.floor(360/barS));
+    const off=new OfflineAudioContext(2,Math.ceil((bars*barS+2)*SR),SR);
+    setup(off);
+    for(let s=0;s<bars*16;s++)play(s,s*spb,spb);
+    const buf=await off.startRendering();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(toWav(buf));a.download='my-dj-song.wav';
+    document.body.appendChild(a);a.click();a.remove();
+    $('st').textContent='✅ ডাউনলোড শুরু হয়েছে (my-dj-song.wav)';
+  }catch(e){$('st').textContent='সমস্যা হয়েছে: '+e.message}
+  finally{
+    ({ctx,bus,bassF,echoIn,panner,lfoG,noiseBuf}=live);
+    rendering=false;$('dl').disabled=false;$('play').disabled=false;
+  }
+};
+
+/* ---- Controls ---- */
+$('bpm').oninput=e=>$('bpmV').textContent=e.target.value+' BPM';
+$('bass').oninput=e=>{$('bassV').textContent=e.target.value+' dB';applyCtl()};
+$('echo').oninput=e=>{$('echoV').textContent=e.target.value+'%';applyCtl()};
+$('vol').oninput=e=>$('volV').textContent=e.target.value+'%';
+function tg(id,cb){const b=$(id);b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);cb(on)}}
+tg('riserSw',on=>riserOn=on);
+tg('d8Sw',()=>applyCtl());
+</script>
+</body>
+</html>
